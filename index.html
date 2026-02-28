@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Race 6 — Tampa Bay Downs</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink: #0d0c08;
+    --cream: #f5f0e8;
+    --gold: #d4a017;
+    --orange: #e67e22;
+    --red: #c0392b;
+    --green: #27ae60;
+    --card: #181610;
+    --border: #2a2618;
+    --muted: #6b6357;
+    --dirt: #b8832e;
+    --best: #8b0000;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    padding: 0 0 60px;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  /* HEADER — special "Best Bet" styling */
+  .header {
+    background: linear-gradient(160deg, #1a0505, #2e0e0e, #1a1005);
+    padding: 28px 20px 22px;
+    border-bottom: 3px solid var(--red);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '⭐';
+    position: absolute;
+    font-size: 160px;
+    right: -20px;
+    top: -20px;
+    opacity: 0.05;
+  }
+
+  .race-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .race-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--red);
+    line-height: 1.1;
+  }
+
+  .race-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  .best-bet-ribbon {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 5px 14px;
+    text-transform: uppercase;
+    margin-top: 14px;
+  }
+
+  .purse-line {
+    font-size: 11px;
+    color: var(--gold);
+    margin-top: 8px;
+    font-weight: 700;
+  }
+
+  /* SCOREBOARD — race results so far */
+  .scoreboard {
+    margin: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .scoreboard-header {
+    background: #1e1c12;
+    padding: 8px 14px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+    font-size: 11px;
+  }
+
+  .score-row:last-child { border-bottom: none; }
+
+  .score-r {
+    color: var(--muted);
+    font-size: 10px;
+    width: 24px;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  .score-horse {
+    flex: 1;
+    font-weight: 700;
+    color: var(--cream);
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+  }
+
+  .score-result {
+    font-size: 10px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .win-tag { color: var(--green); font-weight: 700; }
+  .pending-tag { color: var(--muted); }
+
+  /* THE CASE */
+  .case-section {
+    margin: 14px;
+    border: 1px solid var(--red);
+    overflow: hidden;
+  }
+
+  .case-header {
+    background: var(--red);
+    padding: 10px 16px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: white;
+    font-weight: 700;
+  }
+
+  .case-body {
+    background: var(--card);
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.75;
+    color: #b0a898;
+  }
+
+  .case-body strong { color: var(--cream); }
+  .case-body em { color: var(--gold); font-style: normal; font-weight: 700; }
+
+  /* TRAINER SPOTLIGHT */
+  .trainer-card {
+    margin: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .trainer-header {
+    background: #1e1c12;
+    padding: 8px 14px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .trainer-body {
+    padding: 14px 16px;
+    font-size: 12px;
+    color: #a09080;
+    line-height: 1.7;
+  }
+
+  .trainer-body strong { color: var(--cream); }
+
+  .trainer-stat-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .trainer-stat {
+    background: #252015;
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .trainer-stat-val {
+    font-weight: 700;
+    color: var(--gold);
+    display: block;
+    font-size: 15px;
+  }
+
+  .trainer-stat-lbl {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* VERDICT */
+  .verdict {
+    margin: 14px;
+    background: linear-gradient(135deg, #8b0000, #c0392b);
+    padding: 18px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .verdict::before {
+    content: '🥭';
+    position: absolute;
+    font-size: 80px;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.12;
+  }
+
+  .verdict-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 6px;
+  }
+
+  .verdict-pick {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1.15;
+  }
+
+  .verdict-sub {
+    font-size: 12px;
+    font-style: italic;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+
+  .verdict-odds {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    padding: 3px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  .verdict-reason {
+    font-size: 12px;
+    margin-top: 12px;
+    opacity: 0.92;
+    line-height: 1.7;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding-top: 12px;
+  }
+
+  /* WAGER BOX */
+  .wager-box {
+    margin: 0 14px 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .wager-header {
+    background: var(--card);
+    padding: 10px 14px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .wager-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+  }
+
+  .wager-row:last-child { border-bottom: none; }
+
+  .wager-type {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    width: 66px;
+    flex-shrink: 0;
+  }
+
+  .wager-detail {
+    flex: 1;
+  }
+
+  .wager-horses {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cream);
+    font-family: 'Playfair Display', serif;
+  }
+
+  .wager-explain {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .wager-note {
+    font-size: 10px;
+    color: var(--green);
+    font-weight: 700;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 18px 14px 8px;
+  }
+
+  /* HORSE CARDS */
+  .horse-card {
+    margin: 0 14px 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .horse-card.the-pick { border-color: var(--red); }
+  .horse-card.main-rival { border-color: var(--gold); }
+  .horse-card.watch { border-color: #4a7fc1; }
+  .horse-card.pass { opacity: 0.5; }
+
+  .badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    color: white;
+  }
+
+  .badge.pick { background: var(--red); }
+  .badge.rival { background: var(--gold); color: var(--ink); }
+  .badge.watch { background: #4a7fc1; }
+  .badge.debut { background: #6c3483; }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pp-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    flex-shrink: 0;
+    background: #252015;
+    color: var(--muted);
+    border: 2px solid var(--border);
+  }
+
+  .horse-card.the-pick .pp-circle { background: var(--red); color: white; border-color: var(--red); }
+  .horse-card.main-rival .pp-circle { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+  .horse-card.watch .pp-circle { background: #4a7fc1; color: white; border-color: #4a7fc1; }
+
+  .horse-info { flex: 1; min-width: 0; }
+
+  .horse-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--cream);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .horse-card.the-pick .horse-name { color: #ff6b6b; }
+  .horse-card.main-rival .horse-name { color: var(--gold); }
+
+  .horse-meta { font-size: 10px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  .odds-fig {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    gap: 4px;
+  }
+
+  .odds-tag {
+    background: var(--ink);
+    color: var(--gold);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+  }
+
+  .fig-tag { font-size: 10px; color: var(--muted); text-align: right; }
+  .fig-tag span { font-weight: 700; color: var(--cream); }
+
+  /* Speed bar */
+  .speed-section { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+
+  .speed-row { display: flex; align-items: center; gap: 10px; }
+
+  .speed-label {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    width: 52px;
+    flex-shrink: 0;
+  }
+
+  .speed-bar-wrap { flex: 1; height: 5px; background: #252015; overflow: hidden; }
+  .speed-bar { height: 100%; }
+
+  .speed-val { font-size: 12px; font-weight: 700; width: 36px; text-align: right; flex-shrink: 0; }
+
+  /* Analysis */
+  .card-analysis {
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #a09088;
+    line-height: 1.7;
+  }
+
+  .card-analysis strong { color: var(--cream); }
+  .card-analysis em { color: var(--gold); font-style: normal; }
+
+  /* Tags */
+  .tags-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 14px 12px; }
+
+  .tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .tag.green { border-color: var(--green); color: var(--green); }
+  .tag.red { border-color: var(--red); color: #ff6b6b; }
+  .tag.gold { border-color: var(--gold); color: var(--gold); }
+  .tag.blue { border-color: #4a7fc1; color: #4a7fc1; }
+  .tag.purple { border-color: #8e44ad; color: #a569bd; }
+
+  /* Confidence */
+  .conf-section {
+    padding: 8px 14px 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .conf-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); width: 72px; flex-shrink: 0; }
+  .conf-bar-wrap { flex: 1; height: 4px; background: #252015; }
+  .conf-bar { height: 100%; }
+  .conf-pct { font-size: 11px; font-weight: 700; width: 32px; text-align: right; }
+
+  /* DIVIDER */
+  hr.div { margin: 6px 14px; border: none; border-top: 1px dashed var(--border); }
+
+  /* KEY QUESTION BOX */
+  .question-box {
+    margin: 14px;
+    background: var(--card);
+    border: 1px solid #4a7fc1;
+    padding: 14px 16px;
+  }
+
+  .question-header {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #4a7fc1;
+    margin-bottom: 10px;
+  }
+
+  .question-item {
+    font-size: 12px;
+    color: #a09088;
+    line-height: 1.7;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .question-item:last-child { border-bottom: none; }
+  .question-item strong { color: var(--cream); }
+
+  /* SOURCES */
+  .source-links { margin: 14px; display: flex; flex-direction: column; gap: 8px; }
+
+  .source-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    padding: 10px 12px;
+    text-decoration: none;
+    border: 1px solid var(--border);
+  }
+
+  .source-link:active { border-color: var(--gold); }
+
+  .source-icon { font-size: 18px; flex-shrink: 0; }
+  .source-info { flex: 1; }
+  .source-name { font-size: 12px; font-weight: 700; color: var(--cream); }
+  .source-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .source-arrow { color: var(--gold); font-size: 14px; flex-shrink: 0; }
+
+  /* FOOTER */
+  .footer { text-align: center; font-size: 10px; color: var(--muted); padding: 24px 16px; line-height: 1.8; }
+  .footer a { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="race-label">Tampa Bay Downs · Feb 28, 2026</div>
+  <div class="race-title">Race 6</div>
+  <div class="race-sub">1 Mile 40 Yards · Dirt · Maiden Special Weight · Fillies 3YO</div>
+  <div class="best-bet-ribbon">⭐ Mango's Best Bet of the Day</div>
+  <div class="purse-line">💰 $55,000 Purse — biggest race of the card so far</div>
+</div>
+
+<!-- SCOREBOARD -->
+<div class="scoreboard">
+  <div class="scoreboard-header">📊 Card So Far</div>
+  <div class="score-row">
+    <div class="score-r">R1</div>
+    <div class="score-horse">Wickedthiswaycomes</div>
+    <div class="score-result"><span class="win-tag">✓ WON $25.00</span></div>
+  </div>
+  <div class="score-row">
+    <div class="score-r">R2</div>
+    <div class="score-horse">Bit of Frost</div>
+    <div class="score-result"><span class="win-tag">✓ WON $3.60</span></div>
+  </div>
+  <div class="score-row">
+    <div class="score-r">R3</div>
+    <div class="score-horse">King Freud (won)</div>
+    <div class="score-result"><span class="win-tag">✓ Result in</span></div>
+  </div>
+  <div class="score-row">
+    <div class="score-r">R4</div>
+    <div class="score-horse">Steam Powered (MTO)</div>
+    <div class="score-result"><span class="win-tag">✓ Won (MTO)</span></div>
+  </div>
+  <div class="score-row">
+    <div class="score-r">R5</div>
+    <div class="score-horse">Result pending</div>
+    <div class="score-result"><span class="pending-tag">⏳ TBD</span></div>
+  </div>
+</div>
+
+<!-- THE CASE -->
+<div class="case-section">
+  <div class="case-header">🎯 Why This Is the Best Bet</div>
+  <div class="case-body">
+    Race 6 is a <strong>Maiden Special Weight</strong> — that's the highest level of maiden race. No claiming price, no cheap horses. These are horses that owners and trainers <strong>believe have real talent</strong> and don't want to risk losing for a bargain tag.<br/><br/>
+    The purse is <strong>$55,000</strong> — nearly triple the bottom claiming races today. That attracts better horses and better connections.<br/><br/>
+    And this field has something rare: <em>two elite trainer angles colliding in the same race.</em>
+  </div>
+</div>
+
+<!-- TRAINER SPOTLIGHT -->
+<div class="trainer-card">
+  <div class="trainer-header">🏆 Trainer Spotlight — Brad H. Cox</div>
+  <div class="trainer-body">
+    Cox is one of the <strong>top 5 trainers in America</strong>. Based in Louisville, he trained <strong>Essential Quality</strong> (2021 Belmont winner), <strong>Monomoy Girl</strong> (multiple Eclipse Award winner), and <strong>Knicks Go</strong> (2021 Horse of the Year). He has <strong>8 Keeneland leading trainer titles</strong>.<br/><br/>
+    <strong>Key signal:</strong> Cox ships horses to Tampa Bay Downs intentionally. He doesn't fill entries — he targets spots where his horses have an edge. Bringing a <strong>3-year-old Authentic filly</strong> to a $55k MSW at a mid-level meet says one thing: she's ready, and this is her spot.
+    <div class="trainer-stat-row">
+      <div class="trainer-stat">
+        <span class="trainer-stat-val">Top 5</span>
+        <span class="trainer-stat-lbl">US Trainer</span>
+      </div>
+      <div class="trainer-stat">
+        <span class="trainer-stat-val">8x</span>
+        <span class="trainer-stat-lbl">Keeneland Title</span>
+      </div>
+      <div class="trainer-stat">
+        <span class="trainer-stat-val">Authentic</span>
+        <span class="trainer-stat-lbl">Sire (2020 KY Derby)</span>
+      </div>
+      <div class="trainer-stat">
+        <span class="trainer-stat-val">Marin</span>
+        <span class="trainer-stat-lbl">Cox's Tampa Jock</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="trainer-card">
+  <div class="trainer-header">🏆 Trainer Spotlight — Kathleen O'Connell</div>
+  <div class="trainer-body">
+    O'Connell is the <strong>queen of Tampa Bay Downs</strong>. She tied the track's single-card win record earlier this 2025–26 season with <strong>4 winners in one day</strong>. She knows this track, this surface, and these conditions better than almost anyone.<br/><br/>
+    Her horse <strong>Sammytrinadamo</strong> (#4) has a published speed figure of <strong>96</strong> — the best in this field among horses who've run. She puts Hector Rafael Diaz Jr. up, a solid jockey in this circuit. <strong>Don't sleep on this one.</strong>
+    <div class="trainer-stat-row">
+      <div class="trainer-stat">
+        <span class="trainer-stat-val">Tampa</span>
+        <span class="trainer-stat-lbl">Home Track</span>
+      </div>
+      <div class="trainer-stat">
+        <span class="trainer-stat-val">4-win</span>
+        <span class="trainer-stat-lbl">Single Card Record</span>
+      </div>
+      <div class="trainer-stat">
+        <span class="trainer-stat-val">96</span>
+        <span class="trainer-stat-lbl">Sammytrinadamo Fig</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VERDICT -->
+<div class="verdict">
+  <div class="verdict-label">🥭 Mango's Best Bet</div>
+  <div class="verdict-pick">#3 Nahla</div>
+  <div class="verdict-sub">Trainer: Brad H. Cox · Jockey: Samuel Marin</div>
+  <div class="verdict-odds">9/5 Morning Line</div>
+  <div class="verdict-reason">
+    No published speed figure means this is likely her debut — or she's been away long enough that the figure has expired. That's not a red flag when Brad Cox is doing the sending. He prepares first-time starters meticulously. His debut win rate nationally is well above average.<br/><br/>
+    Authentic (her sire) won the 2020 Kentucky Derby and is a proven producer of dirt route horses. Samuel Marin has been sharp all day. Cox + Marin + a 9/5 price in a $55k maiden race is a gift.
+  </div>
+</div>
+
+<!-- WAGER BOX -->
+<div class="wager-box">
+  <div class="wager-header">💸 Suggested Wagers</div>
+  <div class="wager-row">
+    <div class="wager-type">Win</div>
+    <div class="wager-detail">
+      <div class="wager-horses">#3 Nahla</div>
+      <div class="wager-explain">Main bet. If Cox brought her here ready, she wins.</div>
+    </div>
+    <div class="wager-note">9/5</div>
+  </div>
+  <div class="wager-row">
+    <div class="wager-type">Exacta</div>
+    <div class="wager-detail">
+      <div class="wager-horses">#3 → #4 / #5</div>
+      <div class="wager-explain">Nahla wins, Sammytrinadamo or Athenix 2nd</div>
+    </div>
+    <div class="wager-note">Nice payout</div>
+  </div>
+  <div class="wager-row">
+    <div class="wager-type">Each Way</div>
+    <div class="wager-detail">
+      <div class="wager-horses">#4 Sammytrinadamo</div>
+      <div class="wager-explain">Best fig in field at 96. If Nahla disappoints, she runs them down.</div>
+    </div>
+    <div class="wager-note">3/1</div>
+  </div>
+</div>
+
+<!-- FIELD -->
+<div class="section-label">The Full Field — Ranked</div>
+
+<!-- NAHLA -->
+<div class="horse-card the-pick">
+  <div class="badge pick">🥭 Best Bet</div>
+  <div class="card-top">
+    <div class="pp-circle">3</div>
+    <div class="horse-info">
+      <div class="horse-name">Nahla</div>
+      <div class="horse-meta">Authentic (2020 KY Derby) · Trainer: Brad H. Cox · Jockey: Samuel Marin</div>
+    </div>
+    <div class="odds-fig">
+      <div class="odds-tag">9/5</div>
+      <div class="fig-tag">Fig <span>—</span></div>
+    </div>
+  </div>
+  <div class="speed-section">
+    <div class="speed-row">
+      <div class="speed-label">Spd Fig</div>
+      <div class="speed-bar-wrap"><div class="speed-bar" style="width:0%;background:var(--red)"></div></div>
+      <div class="speed-val" style="color:var(--muted)">Debut</div>
+    </div>
+  </div>
+  <div class="card-analysis">
+    <strong>No figure = likely debut.</strong> That sounds scary but it's actually how the best horses arrive — undefeated on paper, full of potential. Cox debuts horses with high preparation. His first-time starters often ship short distances from his Kentucky base specifically because the horse is peaking.<br/><br/>
+    <strong>Authentic</strong> is a sire whose fillies love dirt and routes — exactly what this 1M 40Y race demands. Marin knows the Tampa strip cold. At 9/5 you're not getting rich, but you're betting on the best trainer in the race making a calculated move. <em>Trust the process.</em>
+  </div>
+  <div class="tags-row">
+    <div class="tag red">Brad H. Cox</div>
+    <div class="tag red">Authentic Sire</div>
+    <div class="tag red">Samuel Marin</div>
+    <div class="tag purple">Likely Debut</div>
+  </div>
+  <div class="conf-section">
+    <div class="conf-label">Confidence</div>
+    <div class="conf-bar-wrap"><div class="conf-bar" style="width:72%;background:linear-gradient(90deg,var(--red),var(--orange))"></div></div>
+    <div class="conf-pct" style="color:#ff6b6b">72%</div>
+  </div>
+</div>
+
+<!-- SAMMYTRINADAMO -->
+<div class="horse-card main-rival">
+  <div class="badge rival">Main Rival</div>
+  <div class="card-top">
+    <div class="pp-circle">4</div>
+    <div class="horse-info">
+      <div class="horse-name">Sammytrinadamo</div>
+      <div class="horse-meta">Girvin · Trainer: Kathleen O'Connell · Jockey: Hector Rafael Diaz Jr.</div>
+    </div>
+    <div class="odds-fig">
+      <div class="odds-tag">3/1</div>
+      <div class="fig-tag">Fig <span>96</span></div>
+    </div>
+  </div>
+  <div class="speed-section">
+    <div class="speed-row">
+      <div class="speed-label">Spd Fig</div>
+      <div class="speed-bar-wrap"><div class="speed-bar" style="width:96%;background:var(--gold)"></div></div>
+      <div class="speed-val" style="color:var(--gold)">96</div>
+    </div>
+  </div>
+  <div class="card-analysis">
+    <strong>Best published speed figure in the field at 96.</strong> Trained by Kathleen O'Connell who tied Tampa Bay's single-card win record earlier this season — she knows this track inside out. By Girvin (a durable dirt router sire), which suits this distance perfectly.<br/><br/>
+    The honest argument: <em>she's the most battle-tested horse in this race</em>. Nahla is unknown. Sammytrinadamo has proven she can run a 96 on this type of surface. At 3/1 she's the best value horse in the race — if you're skeptical of debuting Cox horses, she's your play.
+  </div>
+  <div class="tags-row">
+    <div class="tag gold">Best Fig (96)</div>
+    <div class="tag gold">Tampa Queen Trainer</div>
+    <div class="tag green">Proven Form</div>
+    <div class="tag gold">Girvin Sire</div>
+  </div>
+  <div class="conf-section">
+    <div class="conf-label">Confidence</div>
+    <div class="conf-bar-wrap"><div class="conf-bar" style="width:62%;background:linear-gradient(90deg,var(--gold),#f1c40f)"></div></div>
+    <div class="conf-pct" style="color:var(--gold)">62%</div>
+  </div>
+</div>
+
+<!-- ATHENIX -->
+<div class="horse-card watch">
+  <div class="badge watch">Watch</div>
+  <div class="card-top">
+    <div class="pp-circle">5</div>
+    <div class="horse-info">
+      <div class="horse-name">Athenix</div>
+      <div class="horse-meta">Good Magic · Trainer: Michael B. Campbell · Jockey: Sonny Leon</div>
+    </div>
+    <div class="odds-fig">
+      <div class="odds-tag">5/2</div>
+      <div class="fig-tag">Fig <span>86</span></div>
+    </div>
+  </div>
+  <div class="speed-section">
+    <div class="speed-row">
+      <div class="speed-label">Spd Fig</div>
+      <div class="speed-bar-wrap"><div class="speed-bar" style="width:86%;background:#4a7fc1"></div></div>
+      <div class="speed-val" style="color:#4a7fc1">86</div>
+    </div>
+  </div>
+  <div class="card-analysis">
+    Gets <strong>Sonny Leon</strong> — one of the most dangerous riders on the card today (multiple big-race wins on the Tampa circuit). Good Magic is a quality sire. Fig of 86 is solid but trails Sammytrinadamo by 10 points. At 5/2 she's essentially co-second-favorite.<br/><br/>
+    The case for Athenix: Leon knows how to rate a horse in a mile race and time a run. If the pace is honest early, he'll be lurking. <em>Trifecta must-use.</em>
+  </div>
+  <div class="tags-row">
+    <div class="tag blue">Sonny Leon</div>
+    <div class="tag blue">Good Magic</div>
+    <div class="tag">Trifecta Use</div>
+  </div>
+  <div class="conf-section">
+    <div class="conf-label">Confidence</div>
+    <div class="conf-bar-wrap"><div class="conf-bar" style="width:52%;background:linear-gradient(90deg,#4a7fc1,#5dade2)"></div></div>
+    <div class="conf-pct" style="color:#5dade2">52%</div>
+  </div>
+</div>
+
+<!-- SYLFRENA -->
+<div class="horse-card">
+  <div class="card-top">
+    <div class="pp-circle">1</div>
+    <div class="horse-info">
+      <div class="horse-name">Sylfrena</div>
+      <div class="horse-meta">Maxfield · Trainer: Christopher Seale · Jockey: Gabriel Maldonado</div>
+    </div>
+    <div class="odds-fig">
+      <div class="odds-tag">8/1</div>
+      <div class="fig-tag">Fig <span>94</span></div>
+    </div>
+  </div>
+  <div class="speed-section">
+    <div class="speed-row">
+      <div class="speed-label">Spd Fig</div>
+      <div class="speed-bar-wrap"><div class="speed-bar" style="width:94%;background:#6e6054"></div></div>
+      <div class="speed-val" style="color:#a09088">94</div>
+    </div>
+  </div>
+  <div class="card-analysis">
+    Fig of 94 is the second-best published number in the field — within 2 points of Sammytrinadamo. <strong>Massively underrated at 8/1.</strong> By Maxfield (a rising sire), trained by Christopher Seale who is quietly effective at Tampa. The case against: Maldonado isn't as sharp as Leon or Marin today. But 94 at 8/1 is pure value — worth a small win bet or using in exotics.
+  </div>
+  <div class="tags-row">
+    <div class="tag gold">94 Fig at 8/1</div>
+    <div class="tag">Maxfield Sire</div>
+    <div class="tag green">Value Pick</div>
+  </div>
+</div>
+
+<!-- INKLING -->
+<div class="horse-card">
+  <div class="card-top">
+    <div class="pp-circle">7</div>
+    <div class="horse-info">
+      <div class="horse-name">Inkling</div>
+      <div class="horse-meta">Street Sense · Trainer: Eoin G. Harty · Jockey: Jesus Lopez Castanon</div>
+    </div>
+    <div class="odds-fig">
+      <div class="odds-tag">8/1</div>
+      <div class="fig-tag">Fig <span>71</span></div>
+    </div>
+  </div>
+  <div class="speed-section">
+    <div class="speed-row">
+      <div class="speed-label">Spd Fig</div>
+      <div class="speed-bar-wrap"><div class="speed-bar" style="width:71%;background:#4a4038"></div></div>
+      <div class="speed-val" style="color:#6b6357">71</div>
+    </div>
+  </div>
+  <div class="card-analysis">
+    Trained by Eoin Harty (a respected name nationally) but the 71 fig doesn't support 8/1 odds in this company. By Street Sense — can produce miles runners, but this fig trails the leaders by 25 points. Hard to use seriously.
+  </div>
+  <div class="tags-row">
+    <div class="tag">Eoin Harty</div>
+    <div class="tag">Street Sense</div>
+  </div>
+</div>
+
+<!-- PASS PILE -->
+<hr class="div"/>
+<div class="section-label">Pass — Bottom of Field</div>
+
+<div class="horse-card pass">
+  <div class="card-top">
+    <div class="pp-circle">6</div>
+    <div class="horse-info">
+      <div class="horse-name">Endless Glory</div>
+      <div class="horse-meta">Nyquist · Kevin Rice / Israel O. Rodriguez · 12/1</div>
+    </div>
+    <div class="odds-fig">
+      <div class="fig-tag">Fig <span>79</span></div>
+    </div>
+  </div>
+  <div class="card-analysis">79 fig, 12/1. Nyquist is a quality sire but the number says she's outclassed here. Rodriguez is capable but can't overcome a 17-point fig deficit to the leader.</div>
+</div>
+
+<div class="horse-card pass">
+  <div class="card-top">
+    <div class="pp-circle">2</div>
+    <div class="horse-info">
+      <div class="horse-name">Mambo Taxi</div>
+      <div class="horse-meta">Violence · Kevin Rice / Gaddiel A. Martinez · 15/1</div>
+    </div>
+    <div class="odds-fig">
+      <div class="fig-tag">Fig <span>—</span></div>
+    </div>
+  </div>
+  <div class="card-analysis">No published fig and 15/1. If Nahla's debut is a mystery, Mambo Taxi's is a bigger one — and she doesn't have a Cox pedigree angle. Pass.</div>
+</div>
+
+<!-- KEY QUESTION -->
+<div class="question-box">
+  <div class="question-header">🤔 The Questions That Decide This Race</div>
+  <div class="question-item">
+    <strong>Is Nahla ready on debut?</strong> Cox's prep style and the fact he shipped her to Tampa (not a big-meet venue) suggests yes — he targets specific spots.
+  </div>
+  <div class="question-item">
+    <strong>Can Sammytrinadamo repeat her 96?</strong> O'Connell knows this strip. If she runs back to form she beats everyone except a fully-ready Nahla.
+  </div>
+  <div class="question-item">
+    <strong>Is Sylfrena (94 fig, 8/1) being overlooked?</strong> On pure numbers, she belongs in this exacta conversation. Worth $5 to win at that price.
+  </div>
+  <div class="question-item">
+    <strong>Does pace set up for a closer?</strong> Mile+ races on dirt often see early leaders tire. If Athenix + Leon rate off a hot pace, the 5/2 shot could swoop at the end.
+  </div>
+</div>
+
+<!-- SOURCES -->
+<div class="section-label">Sources & Live Odds</div>
+<div class="source-links">
+  <a class="source-link" href="https://entries.horseracingnation.com/entries-results/tampa-bay-downs/2026-02-28" target="_blank">
+    <div class="source-icon">🐎</div>
+    <div class="source-info">
+      <div class="source-name">HorseRacingNation — Today's Card</div>
+      <div class="source-desc">Live results, speed figs, all 9 races</div>
+    </div>
+    <div class="source-arrow">→</div>
+  </a>
+  <a class="source-link" href="https://www.equibase.com/static/entry/RaceCardIndexTAM022826USA-EQB.html" target="_blank">
+    <div class="source-icon">📋</div>
+    <div class="source-info">
+      <div class="source-name">Equibase — Official Entries</div>
+      <div class="source-desc">Conditions, scratches, post positions</div>
+    </div>
+    <div class="source-arrow">→</div>
+  </a>
+  <a class="source-link" href="https://www.horseracingnation.com/person/Brad_H_Cox" target="_blank">
+    <div class="source-icon">🏆</div>
+    <div class="source-info">
+      <div class="source-name">Brad Cox — Trainer Profile</div>
+      <div class="source-desc">HRN stats, recent form, win rates</div>
+    </div>
+    <div class="source-arrow">→</div>
+  </a>
+  <a class="source-link" href="https://paulickreport.com/news/thoroughbred-racing/racetrack-roundup-trainer-kathleen-oconnell-ties-tampa-bays-single-card-win-record" target="_blank">
+    <div class="source-icon">📰</div>
+    <div class="source-info">
+      <div class="source-name">Paulick Report — O'Connell Record</div>
+      <div class="source-desc">Kathleen O'Connell ties Tampa card record</div>
+    </div>
+    <div class="source-arrow">→</div>
+  </a>
+  <a class="source-link" href="https://en.wikipedia.org/wiki/Brad_H._Cox" target="_blank">
+    <div class="source-icon">📖</div>
+    <div class="source-info">
+      <div class="source-name">Brad H. Cox — Wikipedia</div>
+      <div class="source-desc">Career, notable horses, Eclipse Awards</div>
+    </div>
+    <div class="source-arrow">→</div>
+  </a>
+</div>
+
+<div class="footer">
+  Speed figures sourced from <a href="https://entries.horseracingnation.com/entries-results/tampa-bay-downs/2026-02-28">HorseRacingNation</a> (Beyer preliminary via Equibase).<br/>
+  🥭 Mango's analysis is for entertainment. Gamble responsibly.
+</div>
+
+</body>
+</html>
